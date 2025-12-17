@@ -35,6 +35,7 @@ def process_images_from_gcs_batch():
     "Eres un tutor experto y un especialista en Google Cloud, enfocado en la certificación Associate Cloud Engineer (ACE). "
     "Tu respuesta **DEBE ESTAR COMPLETAMENTE FORMATEADA EN MARKDOWN**, utilizando encabezados (`#`, `##`) y listas para máxima legibilidad. "
     "Tu tarea es analizar la imagen proporcionada, que contiene una pregunta de examen. "
+    " En las mismas preguntas, se suele resaltar con color distinto la respuesta correcta; pero no siempre es así. "
     "Para cada imagen, debes realizar los siguientes pasos en el siguiente formato Markdown: "
     "**# [Número de Pregunta o Título]**"
     "**## 1. Transcripción**"
@@ -45,6 +46,9 @@ def process_images_from_gcs_batch():
     "Proporciona una explicación concisa y precisa basada en la documentación y las mejores prácticas de Google Cloud, justificando la respuesta correcta y por qué las otras opciones son incorrectas."
     "Tu respuesta debe ser directa y solo contener la información de estudio solicitada."
     "Añade algún link relevante a la documentación oficial de Google Cloud para referencia adicional."
+    "Al final del documento, añade una línea con la etiqueta 'REFERENCIA_PDF:' "
+    "indicando el tema principal de la pregunta (ej. GKE, VPC, IAM, BigQuery). "
+    "EJEMPLO: REFERENCIA_PDF: VPC"
 )
     
     # 3. Configuración del Modelo (Ajustada para respuestas factuales)
@@ -72,14 +76,24 @@ def process_images_from_gcs_batch():
 
     # 4. Procesar cada imagen
     for blob in blobs:
-        filename = f"resultado_{blob.name}.txt"
-        output_blob = storage_client.bucket(OUTPUT_BUCKET).blob(filename)
+        # 1. Definir el nombre del archivo de salida (como lo hiciste al final)
+        base_name = os.path.splitext(blob.name)[0]
+        sanitized_name = base_name.replace('.', '_').replace('/', '_')
+        filename = f"result_{sanitized_name}.md"
 
         # Filtrar solo archivos de imagen
         if not blob.name.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')) or blob.name.endswith('/'):
             print(f"Saltando archivo no imagen: {blob.name}")
             continue
 
+        # 2. Verificar si el archivo de salida YA EXISTE
+        output_blob = storage_client.bucket(OUTPUT_BUCKET).blob(filename)
+
+        if output_blob.exists():
+                print(f"Skipping {blob.name}: Output file {filename} already exists.")
+                continue # <-- Ir al siguiente archivo en el bucle
+
+        # 3. Armo uri de actual input image y Procesar la imagen
         gcs_uri = f"gs://{INPUT_BUCKET}/{blob.name}"
         # print(f"\n====================================================================================")
         print(f"| Procesando: {blob.name} | URI: {gcs_uri}")
@@ -108,27 +122,16 @@ def process_images_from_gcs_batch():
                 model=MODEL_NAME,
                 contents=contents,
                 config=generate_content_config,
-                # system_instruction=system_instruction
             )
-            # print(response.text)
-            output_blob.upload_from_string(response.text)
-            print(f"Resultado guardado en: gs://{OUTPUT_BUCKET}/{filename}")
-            # print("---------------------------")
 
+            # print(response.text)
             if OUTPUT_BUCKET:
-                # Elimina la extensión del archivo de entrada (.png, .jpg, etc.)
-                base_name = os.path.splitext(blob.name)[0]
-                
-                # Sanitizar: Si el usuario eliminó los espacios, esto asegura que solo queden
-                # guiones bajos o guiones si los usó. Reemplazamos puntos residuales.
-                sanitized_name = base_name.replace('.', '_').replace('/', '_')
-                
-                # Nombre final: basado en el nombre de entrada, terminando en ".md"
-                filename = f"result_{sanitized_name}.md"
-                
                 # Guardado
-                output_blob = storage_client.bucket(OUTPUT_BUCKET).blob(filename)
-                output_blob.upload_from_string(response.text.encode('utf-8'))
+                # output_blob.upload_from_string(response.text.encode('utf-8'))
+                output_blob.upload_from_string(
+                    data=response.text.encode('utf-8'),
+                    content_type='text/markdown; charset=UTF-8'
+                )
                 print(f"Resultado en Markdown: gs://{OUTPUT_BUCKET}/{filename}")
             else:
                 print("Advertencia: OUTPUT_BUCKET_NAME no definido. El resultado solo está en los logs.")

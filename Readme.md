@@ -35,5 +35,5 @@ gcloud run jobs update ${JOB_NAME} \
 #     --set-env-vars INPUT_BUCKET_NAME=${BUCKET_DE_ENTRADA},OUTPUT_BUCKET_NAME=${BUCKET_DE_SALIDA} \
 #     --max-retries 0
 
-gcloud run jobs execute ${JOB_NAME} --region ${REGION}
+gcloud run jobs execute ${JOB_NAME} --region ${REGION} --task-timeout 1200s
 ```
