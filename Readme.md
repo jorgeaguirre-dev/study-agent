@@ -2,7 +2,7 @@
 
 ## 📋 Project Overview
 
-The **Study Agent** is an automated system that analyzes exam question images (from the xxxx certification) and generates detailed explanations using Google's Gemini AI model. The system processes images in batch, extracts questions, and produces markdown-formatted study materials.
+The **Study Agent** is an automated system that analyzes exam question images (from the any certification) and generates detailed explanations using Google's Gemini AI model. The system processes images in batch, extracts questions, and produces markdown-formatted study materials.
 
 ### Key Features:
 - 🎯 Automated batch processing of exam question images
@@ -110,9 +110,9 @@ The Dockerfile creates a lightweight containerized application using Python 3.11
 FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt .
-COPY process_images.py .
+COPY main.py .
 RUN pip install --no-cache-dir -r requirements.txt
-ENTRYPOINT ["python", "process_images.py"]
+ENTRYPOINT ["python", "main.py"]
 ```
 
 **Build and push to Artifact Registry**:
@@ -159,7 +159,7 @@ gcloud run jobs execute ${JOB_NAME} --region ${REGION} --task-timeout 1200s
 
 ## 📝 Code Structure
 
-### `process_images.py`
+### `main.py`
 
 **Purpose**: Main processing script that orchestrates image analysis
 
