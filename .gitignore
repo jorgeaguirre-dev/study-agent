@@ -1,1 +1,8 @@
 venv/
+.env
+
+tests/
+tools/
+__pycache__/
+
+system_prompt.txt
