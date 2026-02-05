@@ -1,3 +1,6 @@
+![Python >=3.11](https://img.shields.io/badge/python-%3E%3D3.11-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
 # Study Agent - Complete Documentation
 
 ## 📋 Project Overview
@@ -328,7 +331,9 @@ gcloud run jobs logs read ${JOB_NAME} --region ${REGION} --limit 50
 
 ## 📄 License
 
-[Your License Here]
+This project is licensed under the [MIT License](./LICENSE).
+
+💡 For commercial inquiries or specific licensing questions, feel free to contact me.
 
 ## 👤 Author
 
