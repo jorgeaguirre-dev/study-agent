@@ -2,6 +2,7 @@ venv/
 .env
 
 tests/
+draft/
 tools/
 __pycache__/
 

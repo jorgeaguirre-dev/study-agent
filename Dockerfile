@@ -1,17 +1,17 @@
-# Imagen base oficial de Python
+# Official Python base image
 FROM python:3.11-slim
 
-# Establece el directorio de trabajo dentro del contenedor
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copia los archivos de requerimientos y el script al contenedor
+# Copy the requirements file and the script into the container
 COPY requirements.txt .
 COPY process_images.py .
 
-# Instala las dependencias.
-# google-cloud-storage es para listar los archivos en GCS.
+# Install dependencies.
+# google-cloud-storage is used to list files in GCS.
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Comando para ejecutar el script cuando se inicia el contenedor
-# (El contenedor debe terminar cuando se complete la tarea)
+# Command to run the script when the container starts
+# (The container should terminate when the task is complete)
 ENTRYPOINT ["python", "process_images.py"]
